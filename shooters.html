@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+    <head>
+<title> Improvment Projects</title>
+      <p>I always wanted to do digital art ever since I was a kid. In general it amazes me how technology evolved to a point were we can create stunning visuals. Cartoons is probably one of the many inspirations I got in order to be a digital media artist. During this course I was experimenting on other things such as coding and video editing. I will say that video editing sparked an interest on my artistic side. I learned to get comfortable using a camera and learned various techniques from my classmates by looking at their videos. In general what I would like to do as my future career would be designing objects or characters for video games. So in this case I started learning of the various editing effects that premiere had to offer in order to get more familiar with the program.
+
+	what I did during my 2019 spring semester was that I was able to edit videos and just try experiment with different mediums. I used a handful of sources in order to create most of my work. In these videos I wanted something that represented a bit about myself. I wanted to take some time away from maya and Zbrush and just learn something else that In reality I found really fun. What I wanted people to take from my work is the variety of emotions video can create upon someone. Some of the videos I created can make the viewer laugh, feel uneasy, or even just nostalgic. That was my goal for all of my video productions. I will say I have improved on the amount of time it takes for me to edit videos and my content quality has also went up. My end goal as far my career goes is that I want to inflict emotions in video games. Not jut horror or burst of adrenaline rush but having them include a variety of emotions like romance, anger, sadness, and humor.
+</p>
+<h2>Shooters Sky High</h2>
+  <b>Click to shoot, Press A and D to move</b>
+
+
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+        <meta charset="utf-8">
+
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+        <style media="screen">
+
+
+            canvas {
+                background-color: #89CFF0;
+                border: 5px solid #120;
+
+
+            span {
+                color: red;
+            }
+
+        </style>
+    </head>
+    <body>
+
+        <script type="text/javascript">
+
+            const canvas = document.createElement("canvas");
+            const WIDTH = 400, HEIGHT = 500;
+            const ctx = canvas.getContext("2d");
+            const bW = 5, bH = 4, bS = 35;
+            const KEYS = {
+                LEFT: 65,
+                RIGHT: 68
+            }
+            var stopped = false;
+            var input = new inputHandeler();
+            var player = new Player((WIDTH-32)/2, HEIGHT - 2*32, 12, 12, 6);
+            var bullets = [], enemies = [];
+
+            function init(){
+
+                let eR = 3;
+                let eC = 6;
+                let posX = 15;
+                let posY = 10;
+                for (var i = 0; i < eR; i++) {
+                    for (var k = 0; k < eC; k++) {
+                        enemies.push( new Enemy(posX, posY, 32, 32, 20, "white") )
+                        posX += 48;
+                    }
+                    posY += 48;
+                    posX = 15;
+                }
+                canvas.addEventListener('mousedown', function() {
+                    player.shoot();
+                })
+                var loop = setInterval(function() {
+                    if(!stopped) {
+                        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+                        update();
+                        draw();
+                    }
+                }, 1000/30);
+            }
+            function config(){
+                canvas.width = WIDTH;
+                canvas.height = HEIGHT;
+                document.body.appendChild(canvas);
+                init();
+            }
+            function draw(){
+                player.draw();
+                for (var i = 0; i < bullets.length; i++) {
+                    bullets[i].draw();
+                }
+                for (var i = 0; i < enemies.length; i++) {
+                    enemies[i].draw();
+                }
+            }
+            function update(){
+                if(Win()) {
+                    stopped = true;
+                    $('canvas').css({"opacity":0.5})
+                    $('.win').css({"display":"block"})
+                }
+                if(GameOver()) {
+                    stopped = true;
+                    $('canvas').css({"opacity":0.5})
+                    $('.gameOver').css({"display":"block"})
+                }
+                player.update();
+                for (var i = 0; i < bullets.length; i++) {
+                    bullets[i].update();
+                }
+            }
+
+            function Player(x, y, w, h, s) {
+                this.x = x;
+                this.y = y;
+                this.width = w;
+                this.height = h;
+                this.speed = s;
+                this.lifes = 3;
+            }
+            Player.prototype.draw = function () {
+                ctx.beginPath()
+                ctx.fillStyle = "white"
+                ctx.fillRect(this.x, this.y, this.width, this.height)
+            };
+            Player.prototype.update = function () {
+                if(input.isDown(KEYS.RIGHT)) this.x += this.speed;
+                if(input.isDown(KEYS.LEFT)) this.x -= this.speed;
+            };
+            Player.prototype.shoot = function () {
+                bullets.push( new Bullet(this.x + (this.width/2-5), this.y - 7, bW, bH, bS, "red") );
+            };
+            function Bullet(x, y, w, h, s, c, t = "") {
+                this.x = x;
+                this.y = y;
+                this.width = w;
+                this.height = h;
+                this.speed = s;
+                this.color = c;
+                this.type = t;
+            }
+            Bullet.prototype.draw = function () {
+                ctx.beginPath()
+                ctx.fillStyle = this.color
+                ctx.fillRect(this.x, this.y, this.width, this.height)
+            };
+            Bullet.prototype.update = function () {
+                this.y -= this.speed;
+                if(AABB(this.x, this.y, this.width, this.height, player.x, player.y, player.width, player.height)) {
+                    this.width = null;
+                    this.x = -10;
+                    player.lifes--;
+                    player.width -= 6;
+                    player.height -= 6;
+                }
+                for (var i = 0; i < enemies.length; i++) {
+                    if(AABB(this.x, this.y, this.width, this.height, enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height) && this.type != "e") {
+                        this.width = null;
+                        this.x = -10;
+                        enemies.splice(i, 1)
+                    }
+                }
+            };
+            function Enemy(x, y, w, h, v, c) {
+                this.x = x;
+                this.y = y;
+                this.width = w;
+                this.height = h;
+                this.vel = v;
+                this.color = c;
+                this.mTick = 1;
+            }
+            Enemy.prototype.draw = function () {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            };
+            Enemy.prototype.shoot = function() {
+                bullets.push( new Bullet(this.x + (this.width-bW)/2, this.y + this.height + 1, bW, bH, -bS, "red", "e") );
+            }
+            Enemy.prototype.moveE = function() {
+                if(this.mTick % 7 == 0) {
+                    this.y += this.height;
+                    this.vel *= -1;
+                }
+                this.x += this.vel;
+                this.mTick++;
+            }
+            var shootInterval = setInterval(function() {
+
+            }, 450);
+            var moveInterval = setInterval(function() {
+                for (var j = 0; j < enemies.length; j++) {
+                    enemies[j].moveE();
+                }
+            }, 1200);
+
+            function random(min, max) {
+                return (Math.floor(Math.random() * max) + min) > max ? max : Math.floor(Math.random() * max) + min;
+            }
+            function AABB(ax, ay, aw, ah, bx, by, bw, bh) {
+                return ax<bx+bw && ay<by+bh && bx<ax+aw && by<ay+ah;
+            }
+            function inputHandeler() {
+                this.down = {};
+                this.pressed = {};
+                var _this = this;
+                document.addEventListener("keydown", function (evt) {
+                    _this.down[evt.keyCode] = true;
+                });
+                document.addEventListener("keyup", function (evt) {
+                    delete _this.down[evt.keyCode];
+                    delete _this.pressed[evt.keyCode];
+                });
+            };
+            inputHandeler.prototype.isDown = function(code) {
+                return this.down[code];
+            };
+            inputHandeler.prototype.isPressed = function(code) {
+                if(this.pressed[code]) {
+                    return false;
+                } else if(this.down[code]) {
+                    return this.pressed[code] = true;
+                }
+                return false;
+            };
+            function GameOver() {
+                return player.lifes <= 0 || enemies[0].y >= player.y;
+            }
+            function Win() {
+                return enemies.length == 0;
+            }
+            config();
+        </script>
+        <p> This is my first intention of creating a game from scratch. It may not be the fansiest but it is deffinetly a great accomplishment i've achieved. The concept was to recreate
+          a classic video game and try to recreate that with a christmans theme. Which is my favorite holiday. It almost looks like you are shooting snowballs before they fall on top of you.</p>
+<font size="+3">The Static of Lost Memories</font>
+        <iframe src="https://player.vimeo.com/video/337166510" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        <p>The static of a televison can give unsettling vibes and at times even give a sense of fear. When I hear or see static I usually think of lost memories and that is what I wanted to creat for this project.
+          Having the fear of forgetting the most preciouse memories one has with their loved ones.</p>
+<font size="+3">Nostalgia Ave</font>
+        <iframe src="https://player.vimeo.com/video/337169658" width="640" height="427" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        <p> Nostalgia is a weird feeling. Is a feeling that can take us back to our past memories that can either be good or bad. Sometimes is not about having a certain emotion
+          its about relaxing and living the moment. Having time for yourself to reflect of what you've done in your life and is what you are doing leading you to the goals you set for yourself. Atleast
+          that is what I recieved from making this project.</P>
+<font size="+3">Meme!!</font>
+        <iframe src="https://player.vimeo.com/video/337166476" width="640" height="344" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        <p> I wanted to show the best editing skills I had to offer and what better way to show that by making a meme. I will say this video did take me some time to do especially since I had to keyframe every frame.
+          It took quite a while but the end result was soemthing that left me with giggles all day.</P>

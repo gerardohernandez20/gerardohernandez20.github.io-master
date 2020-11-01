@@ -1,0 +1,14 @@
+body{
+background-color: blue;
+background-image: url(http://themindfuljourney.me/wp-content/uploads/2018/09/watercolor-backgrounds-violet-wallpaper-hd-android.jpg);
+}
+iframe {
+  width: 100%;
+height:80vh;
+}
+
+.links a {
+  background-color: white;
+  border: solid 2px white;
+  padding: 20px;
+}
